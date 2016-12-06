@@ -27,12 +27,14 @@ import org.apache.nifi.annotation.behavior.TriggerSerially;
 import org.apache.nifi.annotation.behavior.WritesAttribute;
 import org.apache.nifi.annotation.behavior.WritesAttributes;
 import org.apache.nifi.annotation.documentation.CapabilityDescription;
+import org.apache.nifi.annotation.documentation.SeeAlso;
 import org.apache.nifi.annotation.documentation.Tags;
 import org.apache.nifi.components.PropertyDescriptor;
 import org.apache.nifi.components.state.Scope;
 import org.apache.nifi.processor.ProcessContext;
-import org.apache.nifi.processor.util.StandardValidators;
+import org.apache.nifi.processors.standard.GetFTP;
 import org.apache.nifi.processors.standard.ListFileTransfer;
+import org.apache.nifi.processors.standard.PutFTP;
 import org.apache.nifi.processors.standard.util.FileTransfer;
 
 @TriggerSerially
@@ -40,7 +42,7 @@ import org.apache.nifi.processors.standard.util.FileTransfer;
 @Tags({"list", "ftp", "remote", "ingest", "source", "input", "files"})
 @CapabilityDescription("Performs a listing of the files residing on an FTP server. For each file that is found on the remote server, a new FlowFile will be created with the filename attribute "
     + "set to the name of the file on the remote server. This can then be used in conjunction with FetchFTP in order to fetch those files.")
-//@SeeAlso({FetchFTP.class, GetFTP.class, PutFTP.class})
+@SeeAlso({GetFTP.class, PutFTP.class})
 @WritesAttributes({
     @WritesAttribute(attribute = "ftp.remote.host", description = "The hostname of the FTP Server"),
     @WritesAttribute(attribute = "ftp.remote.port", description = "The port that was connected to on the FTP Server"),
@@ -56,26 +58,20 @@ import org.apache.nifi.processors.standard.util.FileTransfer;
     + "this date the next time that the Processor is run. State is stored across the cluster so that this Processor can be run on Primary Node only and if "
     + "a new Primary Node is selected, the new node will not duplicate the data that was listed by the previous Primary Node.")
 public class IBPListFTP extends ListFileTransfer {
-
+	
+	 
     @Override
     protected List<PropertyDescriptor> getSupportedPropertyDescriptors() {
-        //final PropertyDescriptor port = new PropertyDescriptor.Builder().fromPropertyDescriptor(UNDEFAULTED_PORT).defaultValue("21").build();
-    	final PropertyDescriptor port = new PropertyDescriptor.Builder()
-                .name("Port")
-                .description("The port to connect to on the remote host to fetch the data from")
-                .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
-                .expressionLanguageSupported(true)
-                .required(true)
-                .defaultValue("21")
-                .build();
+       
         final List<PropertyDescriptor> properties = new ArrayList<>();
         properties.add(HOSTNAME);
-        properties.add(port);
+        properties.add(IBPFTPTransfer.PORT);
         properties.add(USERNAME);
         properties.add(IBPFTPTransfer.PASSWORD);
         properties.add(REMOTE_PATH);
         properties.add(DISTRIBUTED_CACHE_SERVICE);
         properties.add(IBPFTPTransfer.RECURSIVE_SEARCH);
+        properties.add(IBPFTPTransfer.MAX_DEPTH);
         properties.add(IBPFTPTransfer.FILE_FILTER_REGEX);
         properties.add(IBPFTPTransfer.PATH_FILTER_REGEX);
         properties.add(IBPFTPTransfer.IGNORE_DOTTED_FILES);
