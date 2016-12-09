@@ -35,6 +35,7 @@ import org.apache.commons.net.ftp.FTPHTTPClient;
 import org.apache.nifi.components.PropertyDescriptor;
 import org.apache.nifi.flowfile.FlowFile;
 import org.apache.nifi.logging.ComponentLog;
+import org.apache.nifi.logging.ProcessorLog;
 import org.apache.nifi.processor.ProcessContext;
 import org.apache.nifi.processor.util.StandardValidators;
 import org.apache.nifi.processors.standard.util.FTPTransfer;
@@ -52,11 +53,50 @@ public class IBPFTPTransfer extends FTPTransfer {
 	private String homeDirectory;
 	private String remoteHostName;
 
+	// Processor properties
 	public static final PropertyDescriptor MAX_DEPTH = new PropertyDescriptor.Builder().name("MaximumDepth")
 			.description("The maximum depth for fetching files")
 			.addValidator(StandardValidators.POSITIVE_INTEGER_VALIDATOR).required(false).build();
 
-	public IBPFTPTransfer(final ProcessContext context, final ComponentLog logger) {
+    public static final PropertyDescriptor RECURSIVE_SEARCH = new PropertyDescriptor.Builder()
+            .name("Search Recursively")
+            .description("If true, will pull files from arbitrarily nested subdirectories; otherwise, will not traverse subdirectories")
+            .required(true)
+            .defaultValue("false")
+            .allowableValues("true", "false")
+            .build();
+    
+    public static final PropertyDescriptor PATH_FILTER_REGEX = new PropertyDescriptor.Builder()
+            .name("Path Filter Regex")
+            .description("When " + RECURSIVE_SEARCH.getName() + " is true, then only subdirectories whose path matches the given Regular Expression will be scanned")
+            .required(false)
+            .addValidator(StandardValidators.REGULAR_EXPRESSION_VALIDATOR)
+            .build();
+    
+    public static final PropertyDescriptor FILE_FILTER_REGEX = new PropertyDescriptor.Builder()
+            .name("File Filter Regex")
+            .description("Provides a Java Regular Expression for filtering Filenames; if a filter is supplied, only files whose names match that Regular Expression will be fetched")
+            .required(false)
+            .addValidator(StandardValidators.REGULAR_EXPRESSION_VALIDATOR)
+            .build();
+
+    public static final PropertyDescriptor USERNAME = new PropertyDescriptor.Builder()
+            .name("Username")
+            .description("Username")
+            .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
+            .expressionLanguageSupported(true)
+            .required(true)
+            .build();
+    
+    public static final PropertyDescriptor HOSTNAME = new PropertyDescriptor.Builder()
+            .name("Hostname")
+            .description("The fully qualified hostname or IP address of the remote system")
+            .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
+            .required(true)
+            .expressionLanguageSupported(true)
+            .build();
+    
+	public IBPFTPTransfer(final ProcessContext context, final ProcessorLog logger) {
 		super(context, logger);
 		this.ctx = context;
 		this.logger = logger;

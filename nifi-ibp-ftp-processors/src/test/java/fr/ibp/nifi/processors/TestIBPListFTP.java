@@ -17,8 +17,6 @@
 package fr.ibp.nifi.processors;
 
 import org.apache.nifi.components.PropertyDescriptor;
-import org.apache.nifi.processors.standard.ListFileTransfer;
-import org.apache.nifi.processors.standard.util.FileTransfer;
 import org.apache.nifi.util.TestRunner;
 import org.apache.nifi.util.TestRunners;
 import org.junit.Test;
@@ -30,8 +28,8 @@ public class TestIBPListFTP {
 
         final TestRunner runner = TestRunners.newTestRunner(new IBPListFTP());
         runner.setValidateExpressionUsage(false);
-        runner.setProperty(ListFileTransfer.HOSTNAME, "IBRPT000");
-        runner.setProperty(ListFileTransfer.USERNAME, "gestLog");
+        runner.setProperty(IBPFTPTransfer.HOSTNAME, "IBRPT000");
+        runner.setProperty(IBPFTPTransfer.USERNAME, "gestLog");
         runner.setProperty(new PropertyDescriptor.Builder()
                 .name("Password")
                 .description("Username")
@@ -39,20 +37,11 @@ public class TestIBPListFTP {
                 .required(true)
                 .build(), "gestLog");
         runner.setProperty(IBPFTPTransfer.PORT, "22");
-        runner.setProperty(FileTransfer.FILE_FILTER_REGEX,"logs_[0-9]{6}\\.zip");
-        runner.setProperty(FileTransfer.PATH_FILTER_REGEX, "^IB(CYC|EQX|WSP|CAU)[0-9]{1}[012345689]{1}[0-9]{1}$");
-        runner.setProperty(FileTransfer.RECURSIVE_SEARCH,"true");
+        runner.setProperty(IBPFTPTransfer.FILE_FILTER_REGEX,"logs_[0-9]{6}\\.zip");
+        runner.setProperty(IBPFTPTransfer.PATH_FILTER_REGEX, "^IB(CYC|EQX|WSP|CAU)[0-9]{1}[012345689]{1}[0-9]{1}$");
+        runner.setProperty(IBPFTPTransfer.RECURSIVE_SEARCH,"true");
         runner.setProperty(IBPFTPTransfer.MAX_DEPTH, "1");
         runner.run(1,true, false);
-
-//        runner.assertAllFlowFilesTransferred(GetFile.REL_SUCCESS, 1);
-//        final List<MockFlowFile> successFiles = runner.getFlowFilesForRelationship(GetFile.REL_SUCCESS);
-//        successFiles.get(0).assertContentEquals("Hello, World!".getBytes("UTF-8"));
-//
-//        final String path = successFiles.get(0).getAttribute("path");
-//        assertEquals("/", path);
-//        final String absolutePath = successFiles.get(0).getAttribute(CoreAttributes.ABSOLUTE_PATH.key());
-//        assertEquals(absTargetPathStr, absolutePath);
     }
 
 
