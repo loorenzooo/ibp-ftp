@@ -18,6 +18,7 @@ package fr.ibp.nifi.processors;
 
 import org.apache.nifi.components.PropertyDescriptor;
 import org.apache.nifi.processors.standard.ListFileTransfer;
+import org.apache.nifi.processors.standard.util.FileTransfer;
 import org.apache.nifi.util.TestRunner;
 import org.apache.nifi.util.TestRunners;
 import org.junit.Test;
@@ -38,6 +39,10 @@ public class TestIBPListFTP {
                 .required(true)
                 .build(), "gestLog");
         runner.setProperty(IBPFTPTransfer.PORT, "22");
+        runner.setProperty(FileTransfer.FILE_FILTER_REGEX,"logs_[0-9]{6}\\.zip");
+        runner.setProperty(FileTransfer.PATH_FILTER_REGEX, "^IB(CYC|EQX|WSP|CAU)[0-9]{1}[012345689]{1}[0-9]{1}$");
+        runner.setProperty(FileTransfer.RECURSIVE_SEARCH,"true");
+        runner.setProperty(IBPFTPTransfer.MAX_DEPTH, "1");
         runner.run(1,true, false);
 
 //        runner.assertAllFlowFilesTransferred(GetFile.REL_SUCCESS, 1);

@@ -73,8 +73,6 @@ public class IBPFTPTransfer extends FTPTransfer {
 
 	private List<FileInfo> getListing(final String path, final int depth, final int maxResults, final Integer maxDepth)
 			throws IOException {
-		logger.info("listing :{} Actual Depth:{}", new Object[]{path,depth});
-		
 		
 		final List<FileInfo> listing = new ArrayList<>();
 		if (maxResults < 1) {
@@ -95,6 +93,9 @@ public class IBPFTPTransfer extends FTPTransfer {
 		final Pattern pathPattern = (!recurse || pathFilterRegex == null) ? null : Pattern.compile(pathFilterRegex);
 		final String remotePath = ctx.getProperty(FileTransfer.REMOTE_PATH).evaluateAttributeExpressions().getValue();
 
+		logger.info(String.format("path : %s", path));
+		logger.info(String.format("pathPattern : %s", pathPattern));
+		
 		// check if this directory path matches the PATH_FILTER_REGEX
 		boolean pathFilterMatches = true;
 		if (pathPattern != null) {
@@ -109,6 +110,8 @@ public class IBPFTPTransfer extends FTPTransfer {
 			}
 		}
 
+		logger.info(String.format("pathFilterMatches : %s", pathFilterMatches));
+		
 		final FTPClient client = getClient(null);
 
 		int count = 0;
@@ -141,10 +144,10 @@ public class IBPFTPTransfer extends FTPTransfer {
 			final String newFullForwardPath = newFullPath.getPath().replace("\\", "/");
 
 			if (file.isDirectory()) {
-				logger.info("PAth: {} ",new Object[] { newFullForwardPath });
+				logger.info("PATH: {} ",new Object[] { newFullForwardPath });
 				// Repertoire
 				if (maxDepth != null) {
-					// Si la profondeur de recherche est définie
+					// Si la profondeur de recherche est définieoct@ve12
 					int level = maxDepth.intValue() - 1;
 					if (depth == level) {
 						logger.info("depth == level");
@@ -218,8 +221,10 @@ public class IBPFTPTransfer extends FTPTransfer {
 			// FILE_FILTER_REGEX - then let's add it
 			if (!file.isDirectory() && !file.isSymbolicLink() && pathFilterMatches) {
 				if (pattern == null || pattern.matcher(filename).matches()) {
+					logger.info(String.format("Ajout du fichier %s/%s", path, file.getName()));
 					listing.add(newFileInfo(file, path));
 					count++;
+					logger.info(String.format("Nb fichiers retenus %s", count));
 				}
 			}
 
